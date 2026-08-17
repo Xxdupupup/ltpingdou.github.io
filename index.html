@@ -1510,7 +1510,8 @@ downloadBtn.onclick = function(){
             }
             if(showCode.checked && cell){
                 ectx.fillStyle = ((cell.r*0.299 + cell.g*0.587 + cell.b*0.114)>160)?'#222222':'#ffffff';
-                ectx.font = `${Math.max(10, Math.min(16, px * 0.72))}px "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif`;
+                const textPx = Math.max(6, Math.min(10, Math.floor(px * 0.42)));
+                ectx.font = `${textPx}px "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif`;
                 ectx.textAlign='center';
                 ectx.textBaseline='middle';
                 ectx.fillText(cell.code, x*px+px/2, y*px+px/2);

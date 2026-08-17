@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MARD拼豆图纸生成器｜增强修复版</title>
+<style>
+:root {
+  --brand-bg: #f7f1eb;
+  --brand-card: #fffdfb;
+  --brand-ink: #2e261f;
+  --brand-accent: #c68b6a;
+  --brand-accent-strong: #a86d4c;
+  --brand-soft: #f3e4d6;
+  --brand-line: #ead7c8;
+  --brand-success: #7a9c75;
+  --brand-success-dark: #5d7f5d;
+  --brand-text-soft: #6a5a4f;
+  --brand-shadow: rgba(90, 68, 55, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 10px 10px 18px;
+  background:
+    radial-gradient(circle at top left, rgba(198, 139, 106, 0.12), transparent 28%),
+    linear-gradient(180deg, #f9f4f0 0%, #f2f5f8 100%);
+  color: var(--brand-ink);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.brand-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--brand-soft), #fff4ee);
+  border: 1px solid var(--brand-line);
+  color: var(--brand-accent-strong);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 18px rgba(168, 109, 76, 0.08);
+}
+
+h2 {
+  text-align: center;
+  margin: 10px 0 4px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--brand-ink);
+  font-size: clamp(1.45rem, 5vw, 2.2rem);
+}
+
+.tip {
+  color: var(--brand-text-soft);
+  font-size: 13px;
+  text-align: center;
+  margin-bottom: 20px;
+  letter-spacing: 0.04em;
+}
+
+.control-panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,250,247,0.96));
+  padding: 12px 10px;
+  border: 1px solid var(--brand-line);
+  border-radius: 18px;
+  box-shadow: 0 12px 28px var(--brand-shadow);
+  margin-bottom: 14px;
+  display: flex;
+  gap:10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.control-group {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height: 38px;
+  padding: 5px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(234, 215, 200, 0.8);
+  background: rgba(255,255,255,0.52);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+label {
+  font-size:14px;
+  color:#334155;
+  white-space:nowrap;
+}
+
+input[type="number"] {
+  width:84px;
+  padding:6px 8px;
+  border:1px solid #d7c7b8;
+  border-radius:8px;
+  background: #fffdfb;
+  font-size:14px;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:border 0.2s, box-shadow 0.2s;
+}
+input[type="number"]:focus{
+  outline:none;
+  border-color:var(--brand-accent-strong);
+  box-shadow:0 0 0 3px rgba(168,109,76,0.08);
+}
+
+input[type="file"]{
+  font-size:14px;
+  background: linear-gradient(180deg, #fffdfb, #fff7f2);
+  border:1px solid #e6d5c7;
+  border-radius:12px;
+  padding: 10px 12px;
+  color: var(--brand-ink);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+  margin-right: 10px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--brand-accent), var(--brand-accent-strong));
+  color: #fff;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--brand-accent), var(--brand-accent-strong));
+  color: #fff;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--brand-accent-strong);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.btn {
+  padding:9px 16px;
+  border:none;
+  border-radius:12px;
+  font-size:14px;
+  cursor:pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 14px rgba(59, 49, 42, 0.08);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary{
+  background: linear-gradient(135deg, var(--brand-accent), var(--brand-accent-strong));
+  color:#fff;
+}
+.btn-primary:hover{
+  background: linear-gradient(135deg, var(--brand-accent-strong), var(--brand-accent));
+}
+.btn-success{
+  background: linear-gradient(135deg, var(--brand-success), var(--brand-success-dark));
+  color:#fff;
+}
+.btn-success:hover{
+  background: linear-gradient(135deg, var(--brand-success-dark), var(--brand-success));
+}
+.btn-ghost{
+  background:#f7f4f1;
+  color:#4a3b33;
+  border:1px solid var(--brand-line);
+}
+.btn-ghost:hover{
+  background:#efe5dc;
+}
+
+.mobile-bottom-bar {
+  position: -webkit-sticky;
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  gap: 8px;
+  padding: 10px 8px 12px;
+  margin-top: 12px;
+  background: rgba(249, 244, 240, 0.96);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--brand-line);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .mobile-bottom-bar {
+    background: rgba(249, 244, 240, 0.98);
+  }
+}
+
+.mobile-bottom-bar .btn {
+  flex: 1;
+  min-height: 46px;
+  font-weight: 700;
+}
+
+.wrap {
+  display:flex;
+  gap:24px;
+  flex-wrap:wrap;
+}
+
+.panel {
+  flex:1;
+  min-width:340px;
+}
+
+.panel h4{
+  margin:0 0 10px 0;
+  font-weight:600;
+  color:#1e293b;
+}
+
+.canvas-card {
+  background: linear-gradient(180deg, #ffffff, #fffcfa);
+  padding:16px;
+  border-radius:16px;
+  border:1px solid var(--brand-line);
+  box-shadow:0 12px 26px rgba(59, 49, 42, 0.06);
+  overflow:auto;
+}
+
+canvas {
+  display:block;
+  margin:0 auto;
+  image-rendering:pixelated;
+  border:1px solid #e8d7ca;
+  border-radius:8px;
+  background: linear-gradient(45deg, #f5f5f4 25%, transparent 25%), linear-gradient(-45deg, #f5f5f4 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f5f5f4 75%), linear-gradient(-45deg, transparent 75%, #f5f5f4 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}
+
+.stat-card{
+  background: linear-gradient(180deg, #fffdfb, #fff8f3);
+  padding:16px;
+  border-radius:16px;
+  border:1px solid var(--brand-line);
+  box-shadow:0 12px 26px rgba(59, 49, 42, 0.06);
+  margin-top:12px;
+}
+
+#stat {
+  white-space:pre-wrap;
+  font-family:Consolas,Monospace;
+  font-size:13px;
+  max-height:520px;
+  overflow:auto;
+  line-height:1.7;
+  color:#334155;
+}
+
+.copy-bar{
+  margin-bottom:10px;
+  display:flex;
+  gap:8px;
+}
+
+.warn-text{
+  color:#dc2626;
+  font-size:13px;
+}
+
+@media (max-width:768px){
+  body {
+    margin: 0;
+    padding: 8px 8px 72px;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    line-height: 1.25;
+    margin-top: 8px;
+  }
+
+  .tip {
+    font-size: 11px;
+    line-height: 1.5;
+    padding: 0 6px;
+    margin-bottom: 12px;
+  }
+
+  .control-panel{
+    flex-direction:column;
+    align-items:stretch;
+    padding: 10px 8px;
+    gap: 8px;
+  }
+
+  .control-group{
+    justify-content:space-between;
+    width: 100%;
+    flex-wrap: nowrap;
+    padding: 2px 2px;
+  }
+
+  .control-group label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 12px;
+  }
+
+  input[type="number"] {
+    width: 76px;
+    min-height: 34px;
+    font-size: 16px;
+  }
+
+  input[type="file"] {
+    width: 100%;
+    min-height: 38px;
+    font-size: 13px;
+  }
+
+  input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+
+  .btn {
+    min-height: 40px;
+    padding: 10px 14px;
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .wrap {
+    display:block;
+  }
+
+  .panel {
+    min-width: 0;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+
+  .panel h4 {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .canvas-card, .stat-card {
+    padding: 8px;
+  }
+
+  canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  #stat {
+    max-height: 300px;
+    font-size: 11px;
+  }
+
+  .copy-bar {
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 8px;
+  }
+
+  .color-modal-content {
+    min-width: 0 !important;
+    width: min(94vw, 420px) !important;
+    padding: 12px !important;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="brand-header">
+  <span class="brand-badge">吕童定制</span>
+</div>
+<h2>MARD拼豆图纸生成器</h2>
+<p class="tip">吕童手作 · 格子内显示色号 · 导出 PNG 自动带底部图例</p>
+
+<div class="control-panel">
+  <input type="file" id="fileInput" accept="image/*" />
+
+  <div class="control-group">
+    <label>拼豆宽度</label>
+    <input id="sizeW" type="number" value="32"/>
+  </div>
+  <div class="control-group">
+    <label>拼豆高度</label>
+    <input id="sizeH" type="number" value="32"/>
+  </div>
+  <div class="control-group">
+    <label>格子像素</label>
+    <input id="beadPixel" type="number" value="14"/>
+  </div>
+<!-- 新增：前置图像降噪开关，放在enableDenoise旁边 -->
+<div class="control-group">
+    <input type="checkbox" id="preBlur" checked>
+    <label for="preBlur">前置图像降噪(改善渐变杂色)</label>
+</div>
+  <div class="control-group">
+    <label><input id="showCode" type="checkbox" checked/>格子显示色号</label>
+  </div>
+  <div class="control-group">
+    <label><input id="showGrid" type="checkbox" checked/>绘制网格线</label>
+  </div>
+<div class="control-group" style="display:none;">
+    <label><input id="highDpi" type="checkbox" checked/>2倍高清导出(打印)</label>
+  </div>
+<div class="control-group">
+    <label><input id="enableDenoise" type="checkbox" checked/>3×3降噪平滑(后处理)</label>
+</div>
+<div class="control-group">
+    <label><input id="mergeWhiteH01H02" type="checkbox"/>合并H01/H02白色</label>
+</div>
+<div class="control-group">
+    <label><input id="ignoreWhiteBg" type="checkbox" checked/>忽略纯白背景</label>
+</div>
+<div class="control-group">
+    <label><input id="autoDetectMain" type="checkbox" checked/>自动识别主图</label>
+</div>
+<div class="control-group">
+    <label><input id="transparentBg" type="checkbox" checked/>透明背景</label>
+</div>
+  <button id="genBtn" class="btn btn-primary">生成图纸</button>
+  <button id="downloadBtn" class="btn btn-success">导出PNG</button>
+  <button id="openDisablePanelBtn" class="btn btn-ghost">禁用色</button>
+</div>
+
+<div class="mobile-bottom-bar">
+  <button id="mobileGenBtn" class="btn btn-primary">生成</button>
+  <button id="mobileDownloadBtn" class="btn btn-success">导出</button>
+  <button id="mobileDisableBtn" class="btn btn-ghost">配色</button>
+</div>
+
+<div class="wrap">
+  <div class="panel">
+    <h4>图纸预览</h4>
+    <div class="canvas-card">
+      <canvas id="beadCanvas"></canvas>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>色号&数量清单</h4>
+    <div class="stat-card">
+      <div class="copy-bar">
+        <button id="copyBtn" class="btn btn-ghost">一键复制清单</button>
+        <span id="warnArea" class="warn-text"></span>
+      </div>
+      <div id="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div id="colorModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;padding:16px;">
+  <div class="color-modal-content" style="background:#fffdfb;padding:16px;border-radius:18px;min-width:320px;max-height:80vh;overflow:auto;border:1px solid #ead7c8;box-shadow:0 18px 36px rgba(72,54,47,0.12);">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+      <h4 style="margin:0;">禁用部分色号</h4>
+      <button id="closeModalBtn" class="btn btn-ghost" style="min-width:34px;width:34px;height:34px;padding:0;border-radius:50%;font-size:22px;line-height:1;display:inline-flex;align-items:center;justify-content:center;">×</button>
+    </div>
+    <div id="colorCheckContainer" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;padding:8px;border:1px solid #f0e5df;border-radius:12px;background:#fffaf7;"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+      <button id="disableAllM" class="btn btn-ghost">全部禁用M系列</button>
+      <button id="clearAllDisable" class="btn btn-ghost">清空禁用</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;">
+      <button id="cancelModalBtn" class="btn btn-ghost">取消</button>
+      <button id="confirmDisableBtn" class="btn btn-primary">确定</button>
+    </div>
+  </div>
+</div>
+<script>
+const MARD_COLORS = [
+  {"code":"A01","name":"奶米黄","r":250,"g":244,"b":200},
+  {"code":"A02","name":"浅奶黄","r":255,"g":255,"b":213},
+  {"code":"A03","name":"亮浅黄","r":254,"g":255,"b":139},
+  {"code":"A04","name":"柠檬黄","r":251,"g":237,"b":86},
+  {"code":"A05","name":"金黄","r":244,"g":215,"b":56},
+  {"code":"A06","name":"橘黄","r":254,"g":172,"b":76},
+  {"code":"A07","name":"鲜橘","r":255,"g":124,"b":47},
+  {"code":"A08","name":"深橘","r":234,"g":97,"b":42},
+  {"code":"A09","name":"土橘","r":209,"g":112,"b":60},
+  {"code":"A10","name":"杏橙","r":235,"g":146,"b":88},
+  {"code":"A11","name":"暖杏","r":242,"g":170,"b":116},
+  {"code":"A12","name":"浅杏","r":248,"g":194,"b":148},
+  {"code":"A13","name":"米杏","r":247,"g":210,"b":178},
+  {"code":"A14","name":"暗金黄","r":217,"g":175,"b":68},
+  {"code":"A15","name":"芥末黄","r":188,"g":148,"b":52},
+  {"code":"A16","name":"赭黄","r":163,"g":121,"b":46},
+  {"code":"A17","name":"古铜黄","r":140,"g":100,"b":40},
+  {"code":"A18","name":"暗橙棕","r":176,"g":100,"b":54},
+  {"code":"A19","name":"蜜橘","r":227,"g":130,"b":64},
+  {"code":"A20","name":"蜜桃橙","r":240,"g":158,"b":102},
+  {"code":"A21","name":"浅蜜杏","r":246,"g":182,"b":132},
+  {"code":"A22","name":"荧光浅黄","r":237,"g":248,"b":120},
+  {"code":"A23","name":"裸杏色","r":228,"g":200,"b":186},
+  {"code":"A24","name":"淡奶黄","r":243,"g":246,"b":169},
+  {"code":"A25","name":"极光黄","r":253,"g":247,"b":133},
+  {"code":"A26","name":"落日橘","r":255,"g":199,"b":52},
+  {"code":"B01","name":"亮草绿","r":223,"g":241,"b":59},
+  {"code":"B02","name":"鲜绿","r":100,"g":243,"b":67},
+  {"code":"B03","name":"嫩叶绿","r":161,"g":245,"b":134},
+  {"code":"B04","name":"草绿","r":95,"g":223,"b":52},
+  {"code":"B05","name":"翠绿色","r":57,"g":225,"b":88},
+  {"code":"B06","name":"薄荷绿","r":100,"g":224,"b":164},
+  {"code":"B07","name":"浅豆绿","r":154,"g":218,"b":142},
+  {"code":"B08","name":"正草绿","r":66,"g":176,"b":62},
+  {"code":"B09","name":"橄榄绿","r":102,"g":133,"b":58},
+  {"code":"B10","name":"灰薄荷","r":149,"g":211,"b":194},
+  {"code":"B11","name":"暗橄榄","r":93,"g":114,"b":42},
+  {"code":"B12","name":"墨绿","r":22,"g":111,"b":65},
+  {"code":"B13","name":"浅黄绿","r":202,"g":235,"b":123},
+  {"code":"B14","name":"柠绿","r":173,"g":233,"b":70},
+  {"code":"B15","name":"深墨绿","r":46,"g":81,"b":50},
+  {"code":"B16","name":"豆青","r":197,"g":237,"b":156},
+  {"code":"B17","name":"暗黄绿","r":155,"g":177,"b":58},
+  {"code":"B18","name":"荧光黄绿","r":230,"g":238,"b":73},
+  {"code":"B19","name":"湖绿","r":36,"g":184,"b":140},
+  {"code":"B20","name":"浅青绿","r":194,"g":240,"b":204},
+  {"code":"B21","name":"深海绿","r":21,"g":106,"b":107},
+  {"code":"B22","name":"灰青绿","r":122,"g":176,"b":164},
+  {"code":"B23","name":"灰豆绿","r":178,"g":204,"b":168},
+  {"code":"B24","name":"茶绿","r":134,"g":158,"b":114},
+  {"code":"B25","name":"暗茶绿","r":88,"g":110,"b":80},
+  {"code":"B26","name":"冷灰绿","r":116,"g":140,"b":132},
+  {"code":"B27","name":"土褐绿","r":140,"g":122,"b":54},
+  {"code":"B28","name":"雾薄荷","r":209,"g":220,"b":193},
+  {"code":"B29","name":"浅湖绿","r":158,"g":229,"b":185},
+  {"code":"B30","name":"淡柠绿","r":236,"g":251,"b":208},
+  {"code":"B31","name":"柔豆绿","r":196,"g":230,"b":181},
+  {"code":"B32","name":"苔绿","r":155,"g":171,"b":90},
+  {"code":"C01","name":"极浅蓝绿","r":232,"g":255,"b":231},
+  {"code":"C02","name":"冰蓝","r":188,"g":249,"b":246},
+  {"code":"C03","name":"浅天蓝","r":160,"g":226,"b":251},
+  {"code":"C04","name":"亮天蓝","r":66,"g":204,"b":255},
+  {"code":"C05","name":"湖蓝","r":1,"g":172,"b":235},
+  {"code":"C06","name":"晴空蓝","r":80,"g":169,"b":240},
+  {"code":"C07","name":"宝蓝","r":1,"g":136,"b":211},
+  {"code":"C08","name":"深蓝","r":16,"g":84,"b":192},
+  {"code":"C09","name":"紫罗兰蓝","r":49,"g":75,"b":202},
+  {"code":"C10","name":"青蓝","r":62,"g":188,"b":226},
+  {"code":"C11","name":"绿松石","r":3,"g":185,"b":185},
+  {"code":"C12","name":"藏青","r":28,"g":51,"b":77},
+  {"code":"C13","name":"雾浅蓝","r":205,"g":232,"b":255},
+  {"code":"C14","name":"冰浅青","r":213,"g":253,"b":255},
+  {"code":"C15","name":"海蓝","r":35,"g":196,"b":198},
+  {"code":"C16","name":"海军蓝","r":23,"g":87,"b":168},
+  {"code":"C17","name":"浅海蓝","r":80,"g":211,"b":236},
+  {"code":"C18","name":"深海军青","r":28,"g":51,"b":68},
+  {"code":"C19","name":"暗青蓝","r":23,"g":135,"b":162},
+  {"code":"C20","name":"暗宝蓝","r":0,"g":130,"b":190},
+  {"code":"C21","name":"灰天蓝","r":124,"g":174,"b":204},
+  {"code":"C22","name":"灰青蓝","r":84,"g":130,"b":154},
+  {"code":"C23","name":"雾霾蓝","r":154,"g":180,"b":196},
+  {"code":"C24","name":"灰藏青","r":58,"g":78,"b":96},
+  {"code":"C25","name":"灰冰蓝","r":184,"g":210,"b":224},
+  {"code":"C26","name":"冷雾蓝","r":142,"g":166,"b":182},
+  {"code":"C27","name":"灰绿松石","r":82,"g":154,"b":158},
+  {"code":"C28","name":"暗绿松石","r":24,"g":132,"b":134},
+  {"code":"C29","name":"午夜蓝","r":14,"g":42,"b":70},
+  {"code":"D01","name":"淡香芋","r":232,"g":218,"b":242},
+  {"code":"D02","name":"浅香芋","r":212,"g":186,"b":234},
+  {"code":"D03","name":"香芋紫","r":186,"g":154,"b":222},
+  {"code":"D04","name":"薰衣草","r":162,"g":124,"b":208},
+  {"code":"D05","name":"紫罗兰","r":134,"g":86,"b":194},
+  {"code":"D06","name":"深紫","r":102,"g":48,"b":162},
+  {"code":"D07","name":"墨紫","r":64,"g":22,"b":104},
+  {"code":"D08","name":"玫紫","r":166,"g":64,"b":166},
+  {"code":"D09","name":"灰香芋","r":188,"g":170,"b":202},
+  {"code":"D10","name":"灰紫","r":146,"g":126,"b":166},
+  {"code":"D11","name":"暗紫灰","r":104,"g":84,"b":122},
+  {"code":"D12","name":"豆沙紫","r":178,"g":138,"b":162},
+  {"code":"D13","name":"灰豆沙紫","r":144,"g":114,"b":134},
+  {"code":"D14","name":"浅藕紫","r":214,"g":194,"b":208},
+  {"code":"D15","name":"藕紫灰","r":174,"g":158,"b":172},
+  {"code":"D16","name":"葡萄紫","r":128,"g":60,"b":144},
+  {"code":"D17","name":"酒紫","r":94,"g":36,"b":110},
+  {"code":"D18","name":"蓝紫","r":80,"g":54,"b":142},
+  {"code":"D19","name":"雾薰衣草","r":174,"g":150,"b":194},
+  {"code":"D20","name":"灰紫罗兰","r":130,"g":104,"b":154},
+  {"code":"D21","name":"暗玫紫","r":138,"g":70,"b":138},
+  {"code":"D22","name":"灰蓝紫","r":100,"g":82,"b":130},
+  {"code":"D23","name":"淡藕荷","r":224,"g":210,"b":226},
+  {"code":"D24","name":"冷灰紫","r":158,"g":144,"b":166},
+  {"code":"D25","name":"暗藕紫","r":122,"g":106,"b":128},
+  {"code":"D26","name":"墨藕紫","r":78,"g":66,"b":84},
+  {"code":"E01","name":"浅樱花粉","r":248,"g":208,"b":220},
+  {"code":"E02","name":"樱花粉","r":244,"g":174,"b":194},
+  {"code":"E03","name":"浅粉","r":240,"g":140,"b":170},
+  {"code":"E04","name":"蜜桃粉","r":234,"g":104,"b":146},
+  {"code":"E05","name":"玫粉","r":224,"g":68,"b":124},
+  {"code":"E06","name":"深玫粉","r":198,"g":38,"b":98},
+  {"code":"E07","name":"冷浅粉","r":246,"g":222,"b":228},
+  {"code":"E08","name":"灰樱花","r":222,"g":188,"b":196},
+  {"code":"E09","name":"灰粉","r":200,"g":156,"b":168},
+  {"code":"E10","name":"豆沙粉","r":178,"g":124,"b":136},
+  {"code":"E11","name":"暗豆沙","r":144,"g":92,"b":104},
+  {"code":"E12","name":"裸粉","r":236,"g":204,"b":204},
+  {"code":"E13","name":"灰裸粉","r":206,"g":178,"b":178},
+  {"code":"E14","name":"暗裸粉","r":170,"g":142,"b":142},
+  {"code":"E15","name":"水粉色","r":242,"g":188,"b":202},
+  {"code":"E16","name":"洋粉","r":218,"g":114,"b":148},
+  {"code":"E17","name":"暗玫红粉","r":182,"g":74,"b":106},
+  {"code":"E18","name":"雾粉","r":230,"g":200,"b":206},
+  {"code":"E19","name":"灰豆沙","r":190,"g":148,"b":154},
+  {"code":"E20","name":"冷豆沙","r":162,"g":122,"b":128},
+  {"code":"E21","name":"浅肉粉","r":244,"g":216,"b":214},
+  {"code":"E22","name":"藕粉","r":218,"g":186,"b":184},
+  {"code":"E23","name":"暗藕粉","r":186,"g":154,"b":152},
+  {"code":"E24","name":"灰玫粉","r":154,"g":114,"b":122},
+  {"code":"F01","name":"浅水红","r":246,"g":204,"b":202},
+  {"code":"F02","name":"水红","r":238,"g":162,"b":160},
+  {"code":"F03","name":"浅红","r":230,"g":118,"b":116},
+  {"code":"F04","name":"正红","r":218,"g":44,"b":44},
+  {"code":"F05","name":"大红","r":202,"g":26,"b":26},
+  {"code":"F06","name":"酒红","r":148,"g":24,"b":42},
+  {"code":"F07","name":"暗红","r":106,"g":20,"b":30},
+  {"code":"F08","name":"橘红","r":236,"g":82,"b":60},
+  {"code":"F09","name":"砖红","r":186,"g":70,"b":54},
+  {"code":"F10","name":"赭红","r":154,"g":60,"b":46},
+  {"code":"F11","name":"灰水红","r":206,"g":164,"b":162},
+  {"code":"F12","name":"灰红","r":174,"g":124,"b":122},
+  {"code":"F13","name":"暗灰红","r":134,"g":90,"b":88},
+  {"code":"F14","name":"豆沙红","r":194,"g":130,"b":122},
+  {"code":"F15","name":"暗豆沙红","r":158,"g":102,"b":94},
+  {"code":"F16","name":"樱桃红","r":222,"g":70,"b":74},
+  {"code":"F17","name":"浆果红","r":174,"g":34,"b":50},
+  {"code":"F18","name":"深红棕红","r":126,"g":30,"b":38},
+  {"code":"F19","name":"雾砖红","r":166,"g":94,"b":80},
+  {"code":"F20","name":"暗砖红","r":130,"g":70,"b":60},
+  {"code":"F21","name":"暖灰红","r":182,"g":134,"b":126},
+  {"code":"F22","name":"冷灰红","r":146,"g":106,"b":98},
+  {"code":"F23","name":"浅浆果","r":206,"g":90,"b":96},
+  {"code":"F24","name":"石榴红","r":162,"g":46,"b":54},
+  {"code":"F25","name":"暗石榴","r":118,"g":34,"b":40},
+  {"code":"G01","name":"极浅肤色","r":247,"g":226,"b":214},
+  {"code":"G02","name":"浅肤色","r":241,"g":202,"b":184},
+  {"code":"G03","name":"自然肤色","r":226,"g":174,"b":150},
+  {"code":"G04","name":"深肤色","r":206,"g":142,"b":114},
+  {"code":"G05","name":"小麦色","r":182,"g":118,"b":84},
+  {"code":"G06","name":"浅棕","r":154,"g":94,"b":62},
+  {"code":"G07","name":"中棕","r":124,"g":70,"b":42},
+  {"code":"G08","name":"深棕","r":90,"g":48,"b":26},
+  {"code":"G09","name":"黑棕","r":62,"g":32,"b":16},
+  {"code":"G10","name":"暖米棕","r":222,"g":194,"b":174},
+  {"code":"G11","name":"灰肤","r":198,"g":166,"b":148},
+  {"code":"G12","name":"灰棕","r":166,"g":130,"b":112},
+  {"code":"G13","name":"暗灰棕","r":130,"g":98,"b":82},
+  {"code":"G14","name":"红棕","r":146,"g":82,"b":58},
+  {"code":"G15","name":"土棕","r":114,"g":66,"b":46},
+  {"code":"G16","name":"暖浅咖","r":210,"g":182,"b":164},
+  {"code":"G17","name":"咖色","r":178,"g":146,"b":128},
+  {"code":"G18","name":"深咖","r":142,"g":110,"b":92},
+  {"code":"G19","name":"巧克力","r":106,"g":74,"b":58},
+  {"code":"G20","name":"冷浅肤","r":234,"g":210,"b":200},
+  {"code":"G21","name":"冷灰肤","r":208,"g":182,"b":172},
+  {"code":"H01","name":"透明白","r":252,"g":252,"b":252},
+  {"code":"H02","name":"纯白","r":255,"g":255,"b":255},
+  {"code":"H03","name":"米白","r":244,"g":242,"b":238},
+  {"code":"H04","name":"浅米灰","r":226,"g":224,"b":220},
+  {"code":"H05","name":"极浅灰","r":204,"g":202,"b":198},
+  {"code":"H06","name":"浅灰","r":180,"g":178,"b":174},
+  {"code":"H07","name":"中浅灰","r":156,"g":154,"b":150},
+  {"code":"H08","name":"中灰","r":132,"g":130,"b":126},
+  {"code":"H09","name":"中深灰","r":108,"g":106,"b":102},
+  {"code":"H10","name":"深灰","r":84,"g":82,"b":78},
+  {"code":"H11","name":"暗灰","r":60,"g":58,"b":54},
+  {"code":"H12","name":"近黑灰","r":36,"g":34,"b":30},
+  {"code":"H13","name":"纯黑","r":0,"g":0,"b":0},
+  {"code":"H14","name":"暖浅灰","r":214,"g":210,"b":204},
+  {"code":"H15","name":"暖灰","r":188,"g":184,"b":176},
+  {"code":"H16","name":"暖中灰","r":162,"g":158,"b":150},
+  {"code":"H17","name":"暖深灰","r":116,"g":112,"b":104},
+  {"code":"H18","name":"冷浅灰","r":210,"g":212,"b":214},
+  {"code":"H19","name":"冷灰","r":184,"g":186,"b":188},
+  {"code":"H20","name":"冷中灰","r":158,"g":160,"b":162},
+  {"code":"H21","name":"冷深灰","r":112,"g":114,"b":116},
+  {"code":"H22","name":"蓝调灰","r":140,"g":144,"b":148},
+  {"code":"H23","name":"紫调灰","r":148,"g":142,"b":146},
+  {"code":"M01","name":"莫兰迪米","r":226,"g":222,"b":214},
+  {"code":"M02","name":"莫兰迪浅黄","r":228,"g":224,"b":200},
+  {"code":"M03","name":"莫兰迪杏","r":224,"g":204,"b":186},
+  {"code":"M04","name":"莫兰迪橘","r":214,"g":174,"b":142},
+  {"code":"M05","name":"莫兰迪红棕","r":174,"g":124,"b":104},
+  {"code":"M06","name":"莫兰迪豆沙","r":194,"g":160,"b":154},
+  {"code":"M07","name":"莫兰迪紫灰","r":170,"g":154,"b":166},
+  {"code":"M08","name":"莫兰迪蓝灰","r":154,"g":170,"b":182},
+  {"code":"M09","name":"莫兰迪绿灰","r":164,"g":180,"b":166},
+  {"code":"M10","name":"莫兰迪橄榄灰","r":146,"g":148,"b":128},
+  {"code":"M11","name":"莫兰迪茶灰","r":160,"g":148,"b":136},
+  {"code":"M12","name":"莫兰迪冷灰","r":172,"g":174,"b":176},
+  {"code":"M13","name":"莫兰迪暖灰","r":180,"g":176,"b":170},
+  {"code":"M14","name":"莫兰迪藕灰","r":190,"g":178,"b":182},
+  {"code":"M15","name":"莫兰迪雾蓝","r":162,"g":174,"b":186}
+];
+
+function rgbToXyz(r,g,b){
+  r/=255;g/=255;b/=255;
+  r=r>0.04045?Math.pow((r+0.055)/1.055,2.4):r/12.92;
+  g=g>0.04045?Math.pow((g+0.055)/1.055,2.4):g/12.92;
+  b=b>0.04045?Math.pow((b+0.055)/1.055,2.4):b/12.92;
+  return {x:r*100*0.4124+g*100*0.3576+b*100*0.1805,y:r*100*0.2127+g*100*0.7152+b*100*0.0722,z:r*100*0.0193+g*100*0.1192+b*100*0.9503};
+}
+function xyzToLab(xyz){
+  const xn=95.047,yn=100,zn=108.883;
+  let x=xyz.x/xn,y=xyz.y/yn,z=xyz.z/zn;
+  const f=t=>t>0.008856?Math.pow(t,1/3):7.787*t+16/116;
+  return {L:116*f(y)-16,a:500*(f(x)-f(y)),b:200*(f(y)-f(z))};
+}
+function rgb2lab(r,g,b){return xyzToLab(rgbToXyz(r,g,b));}
+
+let colorCache=new Map();
+function findNearestColor(r,g,b){
+  const key=`${r},${g},${b}`;
+  if(colorCache.has(key)) return colorCache.get(key);
+  const labIn=rgb2lab(r,g,b);
+  let minDist=Infinity,best=null;
+  for(let c of MARD_COLORS){
+    const labC=rgb2lab(c.r,c.g,c.b);
+    const dL=labIn.L-labC.L,da=labIn.a-labC.a,db=labIn.b-labC.b;
+    const dist=dL*dL+da*da+db*db;
+    if(dist<minDist){minDist=dist;best=c;}
+  }
+  colorCache.set(key,best);
+  return best;
+}
+
+function getContrastColor(r,g,b){
+  const lum=(0.299*r+0.587*g+0.114*b)/255;
+  return lum>0.5?"#111":"#fff";
+}
+
+function naturalSortCode(a,b){
+  const reg=/(\D+)|(\d+)/g;
+  function token(s){
+    return Array.from(s.matchAll(reg)).map(m=>isNaN(+m[2])?m[1]:+m[2]);
+  }
+  const ta=token(a),tb=token(b);
+  for(let i=0;i<Math.max(ta.length,tb.length);i++){
+    if(ta[i]==undefined)return -1;
+    if(tb[i]==undefined)return 1;
+    if(typeof ta[i]==="number"&&typeof tb[i]==="number"){
+      if(ta[i]!==tb[i])return ta[i]-tb[i];
+    }else{
+      if(ta[i]<tb[i])return -1;
+      if(ta[i]>tb[i])return 1;
+    }
+  }
+  return 0;
+}
+
+const fileInput = document.getElementById('fileInput');
+const sizeW = document.getElementById('sizeW');
+const sizeH = document.getElementById('sizeH');
+const beadPixel = document.getElementById('beadPixel');
+const showCode = document.getElementById('showCode');
+const showGrid = document.getElementById('showGrid');
+const highDpi = document.getElementById('highDpi');
+highDpi.checked = true;
+const enableDenoise = document.getElementById('enableDenoise');
+const mergeWhiteH01H02 = document.getElementById('mergeWhiteH01H02');
+const ignoreWhiteBg = document.getElementById('ignoreWhiteBg');
+const autoDetectMain = document.getElementById('autoDetectMain');
+const transparentBg = document.getElementById('transparentBg');
+// 新增：前置模糊开关，建议HTML增加checkbox id="preBlur" label="前置图像降噪(改善渐变杂色)"
+const preBlur = document.getElementById('preBlur');
+
+const genBtn = document.getElementById('genBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const copyBtn = document.getElementById('copyBtn');
+const statDom = document.getElementById('stat');
+const warnArea = document.getElementById('warnArea');
+const canvas = document.getElementById('beadCanvas');
+const ctx = canvas.getContext('2d');
+const mobileGenBtn = document.getElementById('mobileGenBtn');
+const mobileDownloadBtn = document.getElementById('mobileDownloadBtn');
+const mobileDisableBtn = document.getElementById('mobileDisableBtn');
+
+const openDisablePanelBtn = document.getElementById('openDisablePanelBtn');
+const colorModal = document.getElementById('colorModal');
+const colorCheckContainer = document.getElementById('colorCheckContainer');
+const disableAllM = document.getElementById('disableAllM');
+const clearAllDisable = document.getElementById('clearAllDisable');
+const confirmDisableBtn = document.getElementById('confirmDisableBtn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const cancelModalBtn = document.getElementById('cancelModalBtn');
+
+function fitCanvasToViewport() {
+  const panelWidth = canvas.parentElement ? canvas.parentElement.clientWidth : canvas.clientWidth;
+  if (!panelWidth || panelWidth <= 0) return;
+  const maxCanvasWidth = Math.min(panelWidth - 12, window.innerWidth - 40);
+  if (canvas.width > 0 && maxCanvasWidth > 0 && canvas.width > maxCanvasWidth) {
+    const scale = maxCanvasWidth / canvas.width;
+    canvas.style.width = `${Math.max(220, canvas.width * scale)}px`;
+  } else {
+    canvas.style.width = '';
+  }
+}
+
+let imgObj = null;
+let disabledCodeSet = new Set();
+let lastGrid = null;
+// 预计算MARD色的LAB缓存，避免每次匹配重复转换
+let mardLabCache = null;
+
+// -------------------------- 颜色空间转换工具 --------------------------
+/** sRGB转XYZ */
+function rgb2xyz(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    r = r > 0.04045 ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
+    g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
+    b = b > 0.04045 ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
+    r *= 100; g *= 100; b *= 100;
+    const x = r * 0.4124 + g * 0.3576 + b * 0.1805;
+    const y = r * 0.2127 + g * 0.7152 + b * 0.0722;
+    const z = r * 0.0193 + g * 0.1192 + b * 0.9503;
+    return { x, y, z };
+}
+
+/** XYZ转LAB D65白点 */
+function xyz2lab(x, y, z) {
+    const xn = 95.047, yn = 100, zn = 108.883;
+    x /= xn; y /= yn; z /= zn;
+    const fn = (t) => t > 0.008856 ? Math.pow(t, 1/3) : (7.787 * t + 16 / 116);
+    const fx = fn(x), fy = fn(y), fz = fn(z);
+    const L = 116 * fy - 16;
+    const a = 500 * (fx - fy);
+    const b = 200 * (fy - fz);
+    return { L, a, b };
+}
+
+/** RGB直接转LAB */
+function rgb2lab(r,g,b){
+    const xyz = rgb2xyz(r,g,b);
+    return xyz2lab(xyz.x,xyz.y,xyz.z);
+}
+
+/** CIEDE2000 色差计算，返回ΔE，越小颜色越接近 */
+function ciede2000(lab1, lab2) {
+    const L1=lab1.L,a1=lab1.a,b1=lab1.b;
+    const L2=lab2.L,a2=lab2.a,b2=lab2.b;
+
+    const C1 = Math.sqrt(a1*a1 + b1*b1);
+    const C2 = Math.sqrt(a2*a2 + b2*b2);
+    const Cbar = (C1 + C2) / 2;
+    const G = 0.5 * (1 - Math.sqrt(Math.pow(Cbar,7)/(Math.pow(Cbar,7)+Math.pow(25,7))));
+    const a1p = a1 * (1 + G);
+    const a2p = a2 * (1 + G);
+    const C1p = Math.sqrt(a1p*a1p + b1*b1);
+    const C2p = Math.sqrt(a2p*a2p + b2*b2);
+
+    const h1p = (b1===0&&a1p===0)?0:Math.atan2(b1,a1p);
+    const h2p = (b2===0&&a2p===0)?0:Math.atan2(b2,a2p);
+    const h1pd = h1p < 0 ? h1p + 2*Math.PI : h1p;
+    const h2pd = h2p < 0 ? h2p + 2*Math.PI : h2p;
+
+    const dLp = L2 - L1;
+    const dCp = C2p - C1p;
+
+    let dhp;
+    if(C1p===0||C2p===0){
+        dhp = 0;
+    }else{
+        const hDiff = h2pd - h1pd;
+        if(Math.abs(hDiff) <= Math.PI) dhp = hDiff;
+        else if(hDiff > Math.PI) dhp = hDiff - 2*Math.PI;
+        else dhp = hDiff + 2*Math.PI;
+    }
+    const dHp = 2*Math.sqrt(C1p*C2p)*Math.sin(dhp/2);
+
+    const Lbarp = (L1+L2)/2;
+    const Cbarp = (C1p + C2p)/2;
+
+    let hbarp;
+    if(C1p===0||C2p===0){
+        hbarp = h1pd + h2pd;
+    }else{
+        if(Math.abs(h1pd - h2pd) <= Math.PI){
+            hbarp = (h1pd + h2pd)/2;
+        }else if(h1pd + h2pd < 2*Math.PI){
+            hbarp = (h1pd + h2pd)/2 + Math.PI;
+        }else{
+            hbarp = (h1pd + h2pd)/2 - Math.PI;
+        }
+    }
+
+    const T = 1
+        - 0.17*Math.cos(hbarp - Math.PI/6)
+        + 0.24*Math.cos(2*hbarp)
+        + 0.32*Math.cos(3*hbarp + Math.PI/30)
+        - 0.20*Math.cos(4*hbarp - 21*Math.PI/60);
+
+    const dtheta = Math.PI/6 * Math.exp(-Math.pow((hbarp - 275*Math.PI/180)/(25*Math.PI/180),2));
+    const RC = 2*Math.sqrt(Math.pow(Cbarp,7)/(Math.pow(Cbarp,7)+Math.pow(25,7)));
+    const SL = 1 + (0.015 * Math.pow(Lbarp - 50,2)) / Math.sqrt(20 + Math.pow(Lbarp - 50,2));
+    const SC = 1 + 0.045 * Cbarp;
+    const SH = 1 + 0.015 * Cbarp * T;
+    const RT = -Math.sin(2*dtheta)*RC;
+
+    const dE00 = Math.sqrt(
+        Math.pow(dLp/SL,2)
+        + Math.pow(dCp/SC,2)
+        + Math.pow(dHp/SH,2)
+        + RT*(dCp/SC)*(dHp/SH)
+    );
+    return dE00;
+}
+
+// 预缓存MARD全部色号LAB，只执行一次
+function buildMardLabCache(){
+    if(mardLabCache) return;
+    mardLabCache = MARD_COLORS.map(c=>{
+        const lab = rgb2lab(c.r,c.g,c.b);
+        return { ...c, lab };
+    });
+}
+
+// -------------------------- 弹窗渲染禁用色复选框 --------------------------
+function renderColorCheck(){
+    colorCheckContainer.innerHTML = '';
+    MARD_COLORS.forEach(c=>{
+        const wrap = document.createElement('div');
+        wrap.style.display='flex';
+        wrap.style.alignItems='center';
+        wrap.style.gap='8px';
+        wrap.style.padding='6px 8px';
+        wrap.style.border='1px solid #f0e5df';
+        wrap.style.borderRadius='10px';
+        wrap.style.background='rgba(255,255,255,0.9)';
+        wrap.style.boxShadow='inset 0 1px 0 rgba(255,255,255,0.7)';
+
+        const cb = document.createElement('input');
+        cb.type='checkbox';
+        cb.dataset.code = c.code;
+        cb.checked = disabledCodeSet.has(c.code);
+        cb.style.accentColor = 'var(--brand-accent-strong)';
+
+        const swatch = document.createElement('span');
+        swatch.style.width='18px';
+        swatch.style.height='18px';
+        swatch.style.backgroundColor=`rgb(${c.r},${c.g},${c.b})`;
+        swatch.style.border='1px solid rgba(0,0,0,0.12)';
+        swatch.style.borderRadius='6px';
+        swatch.style.display='inline-block';
+
+        const label = document.createElement('span');
+        label.style.fontSize='12px';
+        label.style.color='#334155';
+        label.style.fontWeight='600';
+        label.textContent = c.code;
+
+        wrap.appendChild(cb);
+        wrap.appendChild(swatch);
+        wrap.appendChild(label);
+        colorCheckContainer.appendChild(wrap);
+    })
+}
+
+openDisablePanelBtn.onclick = ()=>{
+    renderColorCheck();
+    colorModal.style.display='flex';
+}
+closeModalBtn.onclick = ()=>{
+    colorModal.style.display='none';
+}
+cancelModalBtn.onclick = ()=>{
+    colorModal.style.display='none';
+}
+
+colorModal.addEventListener('click', (event) => {
+    if (event.target === colorModal) {
+        colorModal.style.display = 'none';
+    }
+});
+
+disableAllM.onclick = ()=>{
+    MARD_COLORS.forEach(c=>{
+        if(c.code.startsWith('M')){
+            disabledCodeSet.add(c.code);
+        }
+    })
+    renderColorCheck();
+}
+
+clearAllDisable.onclick = ()=>{
+    disabledCodeSet.clear();
+    renderColorCheck();
+}
+
+confirmDisableBtn.onclick = ()=>{
+    const checks = colorCheckContainer.querySelectorAll('input[type=checkbox]');
+    disabledCodeSet.clear();
+    checks.forEach(cb=>{
+        if(cb.checked){
+            disabledCodeSet.add(cb.dataset.code);
+        }
+    })
+    colorModal.style.display='none';
+}
+
+// 图片加载
+fileInput.onchange = function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev=>{
+        const img = new Image();
+        img.onload = ()=>{
+            imgObj = img;
+            warnArea.textContent = '';
+        }
+        img.src = ev.target.result;
+    }
+    reader.readAsDataURL(file);
+}
+
+// 【新版LAB‑CIEDE2000查找最近色号】替换原来RGB距离
+function findNearestColor(r,g,b){
+    buildMardLabCache();
+    let targetList = mardLabCache.filter(item=>!disabledCodeSet.has(item.code));
+    if(mergeWhiteH01H02.checked){
+        targetList = targetList.filter(x=>x.code!=='H02');
+    }
+    const pixelLab = rgb2lab(r,g,b);
+    let minDeltaE = Infinity;
+    let best = null;
+    for(const c of targetList){
+        const de = ciede2000(pixelLab, c.lab);
+        if(de < minDeltaE){
+            minDeltaE = de;
+            best = c;
+        }
+    }
+    return best;
+}
+
+// 3*3降噪平滑（原有后处理降噪保留，作为二次兜底）
+function denoise(grid,W,H){
+    const out = JSON.parse(JSON.stringify(grid));
+    for(let y=1;y<H-1;y++){
+        for(let x=1;x<W-1;x++){
+            const center = grid[y][x];
+            const near = [];
+            for(let dy=-1;dy<=1;dy++){
+                for(let dx=-1;dx<=1;dx++){
+                    near.push(grid[y+dy][x+dx]);
+                }
+            }
+            //统计出现最多色
+            const cnt = {};
+            near.forEach(p=>{
+                const k = p? p.code:'null';
+                cnt[k] = (cnt[k]||0)+1;
+            })
+            let maxCount=0;
+            let mostKey=null;
+            for(let k in cnt){
+                if(cnt[k]>maxCount){
+                    maxCount=cnt[k];
+                    mostKey=k;
+                }
+            }
+            if(maxCount>=6 && mostKey!=='null'){
+                if(center && center.code!==mostKey){
+                    const rep = near.find(n=>n&&n.code===mostKey);
+                    out[y][x] = rep;
+                }
+            }
+        }
+    }
+    return out;
+}
+
+function isNearWhite(r,g,b, tolerance=18) {
+    return r >= 255 - tolerance && g >= 255 - tolerance && b >= 255 - tolerance;
+}
+
+function isNearGray(r,g,b, tolerance=18) {
+    const diff = Math.max(Math.abs(r-g), Math.abs(g-b), Math.abs(r-b));
+    return diff <= tolerance;
+}
+
+function isSmoothWhiteNeighborhood(data, width, height, x, y) {
+    let whiteCount = 0;
+    let total = 0;
+    for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+            total++;
+            const idx = (ny * width + nx) * 4;
+            const r = data[idx];
+            const g = data[idx + 1];
+            const b = data[idx + 2];
+            const a = data[idx + 3];
+            if (a < 8) continue;
+            const brightness = (r * 0.299 + g * 0.587 + b * 0.114);
+            if (brightness > 230 && Math.abs(r - g) <= 18 && Math.abs(g - b) <= 18) {
+                whiteCount++;
+            }
+        }
+    }
+    return total > 0 && whiteCount / total > 0.7;
+}
+
+function isLikelyBackgroundPixel(r,g,b,a=255) {
+    if (a < 10) return true;
+    const brightness = (r * 0.299 + g * 0.587 + b * 0.114);
+    const nearWhite = isNearWhite(r,g,b, 20) && brightness > 235;
+    const subtleGray = isNearGray(r,g,b, 18) && brightness > 220;
+    return nearWhite || subtleGray;
+}
+
+function buildWhiteBackgroundMask(data, width, height) {
+    const mask = new Uint8Array(width * height);
+    const borderBand = 4;
+
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const isNearBorder = x <= borderBand || y <= borderBand || x >= width - borderBand - 1 || y >= height - borderBand - 1;
+            if (!isNearBorder) continue;
+
+            const idx = (y * width + x) * 4;
+            const r = data[idx];
+            const g = data[idx + 1];
+            const b = data[idx + 2];
+            const a = data[idx + 3];
+            if (a < 8) {
+                mask[y * width + x] = 1;
+                continue;
+            }
+            if (isLikelyBackgroundPixel(r, g, b, a) && isSmoothWhiteNeighborhood(data, width, height, x, y)) {
+                mask[y * width + x] = 1;
+            }
+        }
+    }
+
+    return mask;
+}
+
+function detectMainSubjectBackground(img) {
+    if (!img || !img.width || !img.height) return { isWhiteBackground: false, isTransparent: false };
+
+    const sampleCanvas = document.createElement('canvas');
+    const sampleW = Math.min(120, img.width);
+    const sampleH = Math.min(120, img.height);
+    sampleCanvas.width = sampleW;
+    sampleCanvas.height = sampleH;
+    const sctx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+    sctx.clearRect(0, 0, sampleW, sampleH);
+    sctx.imageSmoothingEnabled = true;
+    sctx.imageSmoothingQuality = 'high';
+    sctx.drawImage(img, 0, 0, sampleW, sampleH);
+
+    const { data } = sctx.getImageData(0, 0, sampleW, sampleH);
+    let whiteBorder = 0;
+    let totalBorder = 0;
+    let alphaHits = 0;
+    let totalPixels = 0;
+
+    for (let y = 0; y < sampleH; y++) {
+        for (let x = 0; x < sampleW; x++) {
+            const idx = (y * sampleW + x) * 4;
+            const r = data[idx];
+            const g = data[idx + 1];
+            const b = data[idx + 2];
+            const a = data[idx + 3];
+            totalPixels++;
+            if (a < 10) {
+                alphaHits++;
+                continue;
+            }
+            if (x <= 2 || y <= 2 || x >= sampleW - 3 || y >= sampleH - 3) {
+                totalBorder++;
+                if (isLikelyBackgroundPixel(r, g, b, a)) {
+                    whiteBorder++;
+                }
+            }
+        }
+    }
+
+    const borderRatio = totalBorder === 0 ? 0 : whiteBorder / totalBorder;
+    const transparentRatio = totalPixels === 0 ? 0 : alphaHits / totalPixels;
+    const isWhiteBackground = borderRatio > 0.65 && transparentRatio < 0.25;
+    return {
+        isWhiteBackground,
+        isTransparent: transparentRatio > 0.15 || isWhiteBackground
+    };
+}
+
+function shouldTreatAsBackground(r, g, b, a = 255, bgMode = 'auto') {
+    if (a < 8) return true;
+    if (bgMode === 'transparent') return false;
+    const useAutoDetect = autoDetectMain && autoDetectMain.checked;
+    if (useAutoDetect) {
+        return isLikelyBackgroundPixel(r, g, b, a);
+    }
+    return ignoreWhiteBg.checked && isLikelyBackgroundPixel(r, g, b, a);
+}
+
+function triggerGenerate(){
+    if(!imgObj){
+        warnArea.textContent="请先选择图片文件";
+        return;
+    }
+    warnArea.textContent='';
+    const w = Number(sizeW.value)||32;
+    const h = Number(sizeH.value)||32;
+    const autoBg = detectMainSubjectBackground(imgObj);
+    const shouldIgnoreWhite = (autoDetectMain.checked && autoBg.isWhiteBackground) || ignoreWhiteBg.checked;
+
+    // 临时画布缩放到目标尺寸
+    const tempCvs = document.createElement('canvas');
+    tempCvs.width = w;
+    tempCvs.height = h;
+    const tctx = tempCvs.getContext('2d', { willReadFrequently: true });
+    tctx.imageSmoothingEnabled = true;
+    tctx.imageSmoothingQuality = 'high';
+    tctx.drawImage(imgObj,0,0,w,h);
+
+    // 新增：前置图像高斯模糊，在取像素之前抑制原图噪点，解决渐变跳豆
+    if(preBlur && preBlur.checked){
+        tctx.filter = 'blur(0.6px)';
+        tctx.drawImage(tempCvs,0,0);
+        tctx.filter = 'none';
+    }
+
+    const imgData = tctx.getImageData(0,0,w,h);
+    const data = imgData.data;
+    const backgroundMask = shouldIgnoreWhite ? buildWhiteBackgroundMask(data, w, h) : new Uint8Array(w * h);
+
+    //构建网格
+    let grid = [];
+    for(let y=0;y<h;y++){
+        const row = [];
+        for(let x=0;x<w;x++){
+            const idx = (y*w+x)*4;
+            const r = data[idx];
+            const g = data[idx+1];
+            const b = data[idx+2];
+            const a = data[idx+3];
+            const isBackground = shouldIgnoreWhite && backgroundMask[y * w + x] === 1;
+            if (isBackground || a <= 8) {
+                row.push(null);
+            } else {
+                const c = findNearestColor(r,g,b);
+                row.push(c);
+            }
+        }
+        grid.push(row);
+    }
+
+    if(enableDenoise.checked){
+        grid = denoise(grid,w,h);
+    }
+    lastGrid = grid;
+
+    //绘制画布
+    const px = Number(beadPixel.value)||14;
+    canvas.width = w*px;
+    canvas.height = h*px;
+    canvas.style.width = '';
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const useTransparentBackground = transparentBg.checked;
+
+    //画拼豆方块
+    for(let y=0;y<h;y++){
+        for(let x=0;x<w;x++){
+            const cell = grid[y][x];
+            ctx.save();
+            if(cell){
+                ctx.fillStyle = `rgb(${cell.r},${cell.g},${cell.b})`;
+            }else if(useTransparentBackground){
+                ctx.clearRect(x*px, y*px, px, px);
+            }else{
+                ctx.fillStyle = '#ffffff';
+            }
+            if(cell || !useTransparentBackground){
+                ctx.fillRect(x*px,y*px,px,px);
+            }
+
+            //网格线
+            if(showGrid.checked){
+                ctx.strokeStyle='#cccccc';
+                ctx.lineWidth=0.5;
+                ctx.strokeRect(x*px,y*px,px,px);
+            }
+
+            //色号文字
+            if(showCode.checked && cell){
+                ctx.fillStyle = ((cell.r*0.299 + cell.g*0.587 + cell.b*0.114)>160)?'#222222':'#ffffff';
+                ctx.font = `${Math.max(7,px*0.42)}px Consolas`;
+                ctx.textAlign='center';
+                ctx.textBaseline='middle';
+                ctx.fillText(cell.code, x*px+px/2, y*px+px/2);
+            }
+            ctx.restore();
+        }
+    }
+
+    fitCanvasToViewport();
+
+    //统计清单
+    const countMap = {};
+    for(let y=0;y<h;y++){
+        for(let x=0;x<w;x++){
+            const c = grid[y][x];
+            if(!c) continue;
+            countMap[c.code] = (countMap[c.code]||0)+1;
+        }
+    }
+    let statText = `图纸尺寸：宽${w} × 高${h}\n\n【色号清单｜数量】\n`;
+    let totalBead =0;
+    for(const code of Object.keys(countMap).sort()){
+        const num = countMap[code];
+        totalBead += num;
+        const info = MARD_COLORS.find(x=>x.code===code);
+        statText += `${code} ${info?.name||''} : ${num}颗\n`;
+    }
+    statText +=`\n合计使用拼豆：${totalBead}颗`;
+    statDom.innerText = statText;
+}
+
+genBtn.onclick = triggerGenerate;
+mobileGenBtn.onclick = triggerGenerate;
+
+mobileDownloadBtn.onclick = function() {
+    downloadBtn.click();
+};
+
+mobileDisableBtn.onclick = function() {
+    renderColorCheck();
+    colorModal.style.display = 'flex';
+};
+
+copyBtn.onclick = async ()=>{
+    try{
+        await navigator.clipboard.writeText(statDom.innerText);
+        alert("清单已复制");
+    }catch(e){
+        alert("复制失败，请手动复制文本");
+    }
+}
+
+window.addEventListener('resize', fitCanvasToViewport);
+window.addEventListener('orientationchange', fitCanvasToViewport);
+
+downloadBtn.onclick = function(){
+    if(!lastGrid){
+        alert("请先生成图纸");
+        return;
+    }
+    const w = Number(sizeW.value);
+    const h = Number(sizeH.value);
+    const px = Number(beadPixel.value);
+    const scale = highDpi.checked?2:1;
+
+    const countMap = {};
+    for(let y=0;y<h;y++){
+        for(let x=0;x<w;x++){
+            const c = lastGrid[y][x];
+            if(!c) continue;
+            countMap[c.code] = (countMap[c.code]||0)+1;
+        }
+    }
+
+    const legendLines = Object.keys(countMap).sort().map(code => {
+        const info = MARD_COLORS.find(x => x.code === code);
+        return { code, name: info?.name || '', count: countMap[code] };
+    });
+
+    const legendColumns = Math.max(2, Math.min(4, Math.ceil(Math.sqrt(legendLines.length))));
+    const legendGap = 10;
+    const itemWidth = Math.max(92, Math.min(130, (w * px - 36) / legendColumns));
+    const legendItemHeight = 20;
+    const legendRows = Math.ceil(legendLines.length / legendColumns);
+    const legendBlockHeight = 48 + legendRows * (legendItemHeight + 8) + 12;
+    const expCvs = document.createElement('canvas');
+    expCvs.width = w*px*scale;
+    expCvs.height = (h*px + legendBlockHeight + 12) * scale;
+    const ectx = expCvs.getContext('2d');
+    ectx.scale(scale,scale);
+    ectx.imageSmoothingEnabled = true;
+    ectx.imageSmoothingQuality = 'high';
+
+    if (!transparentBg.checked) {
+        ectx.fillStyle = '#ffffff';
+        ectx.fillRect(0, 0, w * px, h * px + legendBlockHeight + 12);
+    }
+
+    for(let y=0;y<h;y++){
+        for(let x=0;x<w;x++){
+            const cell = lastGrid[y][x];
+            ectx.save();
+            if(cell){
+                ectx.fillStyle = `rgb(${cell.r},${cell.g},${cell.b})`;
+                ectx.fillRect(x*px,y*px,px,px);
+            } else if (!transparentBg.checked) {
+                ectx.fillStyle='#ffffff';
+                ectx.fillRect(x*px,y*px,px,px);
+            }
+            if(showGrid.checked){
+                ectx.strokeStyle='#cccccc';
+                ectx.lineWidth=0.5;
+                ectx.strokeRect(x*px,y*px,px,px);
+            }
+            if(showCode.checked && cell){
+                ectx.fillStyle = ((cell.r*0.299 + cell.g*0.587 + cell.b*0.114)>160)?'#222222':'#ffffff';
+                ectx.font = `${Math.max(7,px*0.42)}px Consolas`;
+                ectx.textAlign='center';
+                ectx.textBaseline='middle';
+                ectx.fillText(cell.code, x*px+px/2, y*px+px/2);
+            }
+            ectx.restore();
+        }
+    }
+
+    // 图例背景
+    const legendTop = h * px + 10;
+    ectx.fillStyle = '#fffdfb';
+    ectx.fillRect(0, legendTop, w * px, legendBlockHeight);
+    ectx.strokeStyle = '#ead7c8';
+    ectx.lineWidth = 1;
+    ectx.strokeRect(0, legendTop, w * px, legendBlockHeight);
+
+    ectx.fillStyle = '#5d4a3f';
+    ectx.font = 'bold 14px sans-serif';
+    ectx.textAlign = 'left';
+    ectx.fillText('颜色图例', 16, legendTop + 20);
+
+    const startX = 16;
+    const legendY = legendTop + 30;
+    let currentX = startX;
+    let currentY = legendY;
+
+    legendLines.forEach((item, index) => {
+        const color = MARD_COLORS.find(x => x.code === item.code) || { r: 255, g: 255, b: 255 };
+        const swatchX = currentX;
+        const swatchY = currentY;
+        const swatchW = 18;
+        const swatchH = 18;
+
+        ectx.fillStyle = '#f5efe9';
+        ectx.fillRect(swatchX - 4, swatchY - 4, swatchW + 8, swatchH + 8);
+        ectx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
+        ectx.fillRect(swatchX, swatchY, swatchW, swatchH);
+        ectx.strokeStyle = '#d8c5b7';
+        ectx.strokeRect(swatchX, swatchY, swatchW, swatchH);
+
+        ectx.fillStyle = '#334155';
+        ectx.font = '11px sans-serif';
+        ectx.fillText(`${item.code}`, swatchX + 24, swatchY + 12);
+
+        ectx.fillStyle = '#6b7280';
+        ectx.fillText(`×${item.count}`, swatchX + 58, swatchY + 12);
+
+        currentX += itemWidth;
+        if ((index + 1) % legendColumns === 0) {
+            currentX = startX;
+            currentY += legendItemHeight + 8;
+        }
+    });
+
+    const link = document.createElement('a');
+    link.download = `mard拼豆图纸_${w}x${h}.png`;
+    link.href = expCvs.toDataURL('image/png');
+    link.click();
+}
+</script>
+<div style="margin-top:24px; text-align:center; color:#8a6d5d; font-size:12px; letter-spacing:0.12em;">
+  Made by 吕童 · 定制图纸 / 作品呈现
+</div>
+</body>
+</html>

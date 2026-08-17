@@ -173,7 +173,38 @@ input[type="checkbox"] {
   transition: all 0.2s ease;
   box-shadow: 0 6px 14px rgba(59, 49, 42, 0.08);
   -webkit-tap-highlight-color: transparent;
+  position: relative;
 }
+
+.btn:disabled {
+  opacity: 0.75;
+  cursor: wait;
+}
+
+.btn.is-loading {
+  padding-left: 38px;
+}
+
+.btn.is-loading::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border: 2px solid rgba(255,255,255,0.45);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .btn-primary{
   background: linear-gradient(135deg, var(--brand-accent), var(--brand-accent-strong));
   color:#fff;
@@ -804,6 +835,18 @@ const mobileGenBtn = document.getElementById('mobileGenBtn');
 const mobileDownloadBtn = document.getElementById('mobileDownloadBtn');
 const mobileDisableBtn = document.getElementById('mobileDisableBtn');
 
+function setGenerateLoading(isLoading) {
+  const buttons = [genBtn, mobileGenBtn];
+  buttons.forEach((button) => {
+    if (!button) return;
+    button.disabled = isLoading;
+    button.classList.toggle('is-loading', isLoading);
+    const fallback = button.dataset.defaultText || button.textContent.trim();
+    button.dataset.defaultText = fallback;
+    button.textContent = isLoading ? '生成中...' : fallback;
+  });
+}
+
 const openDisablePanelBtn = document.getElementById('openDisablePanelBtn');
 const colorModal = document.getElementById('colorModal');
 const colorCheckContainer = document.getElementById('colorCheckContainer');
@@ -1227,127 +1270,141 @@ function shouldTreatAsBackground(r, g, b, a = 255, bgMode = 'auto') {
     return ignoreWhiteBg.checked && isLikelyBackgroundPixel(r, g, b, a);
 }
 
-function triggerGenerate(){
+async function triggerGenerate(){
     if(!imgObj){
         warnArea.textContent="请先选择图片文件";
         return;
     }
+
+    setGenerateLoading(true);
     warnArea.textContent='';
-    const w = Number(sizeW.value)||32;
-    const h = Number(sizeH.value)||32;
-    const autoBg = detectMainSubjectBackground(imgObj);
-    const shouldIgnoreWhite = (autoDetectMain.checked && autoBg.isWhiteBackground) || ignoreWhiteBg.checked;
 
-    // 临时画布缩放到目标尺寸
-    const tempCvs = document.createElement('canvas');
-    tempCvs.width = w;
-    tempCvs.height = h;
-    const tctx = tempCvs.getContext('2d', { willReadFrequently: true });
-    tctx.imageSmoothingEnabled = true;
-    tctx.imageSmoothingQuality = 'high';
-    tctx.drawImage(imgObj,0,0,w,h);
+    await new Promise((resolve) => {
+        requestAnimationFrame(() => setTimeout(resolve, 120));
+    });
 
-    // 新增：前置图像高斯模糊，在取像素之前抑制原图噪点，解决渐变跳豆
-    if(preBlur && preBlur.checked){
-        tctx.filter = 'blur(0.6px)';
-        tctx.drawImage(tempCvs,0,0);
-        tctx.filter = 'none';
-    }
+    try {
+        const w = Number(sizeW.value)||32;
+        const h = Number(sizeH.value)||32;
+        const autoBg = detectMainSubjectBackground(imgObj);
+        const shouldIgnoreWhite = (autoDetectMain.checked && autoBg.isWhiteBackground) || ignoreWhiteBg.checked;
 
-    const imgData = tctx.getImageData(0,0,w,h);
-    const data = imgData.data;
-    const backgroundMask = shouldIgnoreWhite ? buildWhiteBackgroundMask(data, w, h) : new Uint8Array(w * h);
+        // 临时画布缩放到目标尺寸
+        const tempCvs = document.createElement('canvas');
+        tempCvs.width = w;
+        tempCvs.height = h;
+        const tctx = tempCvs.getContext('2d', { willReadFrequently: true });
+        tctx.imageSmoothingEnabled = false;
+        tctx.imageSmoothingQuality = 'low';
+        tctx.drawImage(imgObj,0,0,w,h);
 
-    //构建网格
-    let grid = [];
-    for(let y=0;y<h;y++){
-        const row = [];
-        for(let x=0;x<w;x++){
-            const idx = (y*w+x)*4;
-            const r = data[idx];
-            const g = data[idx+1];
-            const b = data[idx+2];
-            const a = data[idx+3];
-            const isBackground = shouldIgnoreWhite && backgroundMask[y * w + x] === 1;
-            if (isBackground || a <= 8) {
-                row.push(null);
-            } else {
-                const c = findNearestColor(r,g,b);
-                row.push(c);
+        // 新增：前置图像高斯模糊，在取像素之前抑制原图噪点，解决渐变跳豆
+        if(preBlur && preBlur.checked){
+            tctx.filter = 'blur(0.6px)';
+            tctx.drawImage(tempCvs,0,0);
+            tctx.filter = 'none';
+        }
+
+        const imgData = tctx.getImageData(0,0,w,h);
+        const data = imgData.data;
+        const backgroundMask = shouldIgnoreWhite ? buildWhiteBackgroundMask(data, w, h) : new Uint8Array(w * h);
+
+        //构建网格
+        let grid = [];
+        for(let y=0;y<h;y++){
+            const row = [];
+            for(let x=0;x<w;x++){
+                const idx = (y*w+x)*4;
+                const r = data[idx];
+                const g = data[idx+1];
+                const b = data[idx+2];
+                const a = data[idx+3];
+                const isBackground = shouldIgnoreWhite && backgroundMask[y * w + x] === 1;
+                if (isBackground || a <= 8) {
+                    row.push(null);
+                } else {
+                    const c = findNearestColor(r,g,b);
+                    row.push(c);
+                }
+            }
+            grid.push(row);
+        }
+
+        if(enableDenoise.checked){
+            grid = denoise(grid,w,h);
+        }
+        lastGrid = grid;
+
+        //绘制画布
+        const px = Number(beadPixel.value)||14;
+        canvas.width = w*px;
+        canvas.height = h*px;
+        canvas.style.width = '';
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.imageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.imageSmoothingQuality = 'low';
+        const useTransparentBackground = transparentBg.checked;
+
+        //画拼豆方块
+        for(let y=0;y<h;y++){
+            for(let x=0;x<w;x++){
+                const cell = grid[y][x];
+                ctx.save();
+                if(cell){
+                    ctx.fillStyle = `rgb(${cell.r},${cell.g},${cell.b})`;
+                }else if(useTransparentBackground){
+                    ctx.clearRect(x*px, y*px, px, px);
+                }else{
+                    ctx.fillStyle = '#ffffff';
+                }
+                if(cell || !useTransparentBackground){
+                    ctx.fillRect(x*px,y*px,px,px);
+                }
+
+                //网格线
+                if(showGrid.checked){
+                    ctx.strokeStyle='#cccccc';
+                    ctx.lineWidth=0.5;
+                    ctx.strokeRect(x*px,y*px,px,px);
+                }
+
+                //色号文字
+                if(showCode.checked && cell){
+                    ctx.fillStyle = ((cell.r*0.299 + cell.g*0.587 + cell.b*0.114)>160)?'#222222':'#ffffff';
+                    ctx.font = `${Math.max(7,px*0.42)}px Consolas`;
+                    ctx.textAlign='center';
+                    ctx.textBaseline='middle';
+                    ctx.fillText(cell.code, x*px+px/2, y*px+px/2);
+                }
+                ctx.restore();
             }
         }
-        grid.push(row);
-    }
 
-    if(enableDenoise.checked){
-        grid = denoise(grid,w,h);
-    }
-    lastGrid = grid;
+        fitCanvasToViewport();
 
-    //绘制画布
-    const px = Number(beadPixel.value)||14;
-    canvas.width = w*px;
-    canvas.height = h*px;
-    canvas.style.width = '';
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    const useTransparentBackground = transparentBg.checked;
-
-    //画拼豆方块
-    for(let y=0;y<h;y++){
-        for(let x=0;x<w;x++){
-            const cell = grid[y][x];
-            ctx.save();
-            if(cell){
-                ctx.fillStyle = `rgb(${cell.r},${cell.g},${cell.b})`;
-            }else if(useTransparentBackground){
-                ctx.clearRect(x*px, y*px, px, px);
-            }else{
-                ctx.fillStyle = '#ffffff';
+        //统计清单
+        const countMap = {};
+        for(let y=0;y<h;y++){
+            for(let x=0;x<w;x++){
+                const c = grid[y][x];
+                if(!c) continue;
+                countMap[c.code] = (countMap[c.code]||0)+1;
             }
-            if(cell || !useTransparentBackground){
-                ctx.fillRect(x*px,y*px,px,px);
-            }
-
-            //网格线
-            if(showGrid.checked){
-                ctx.strokeStyle='#cccccc';
-                ctx.lineWidth=0.5;
-                ctx.strokeRect(x*px,y*px,px,px);
-            }
-
-            //色号文字
-            if(showCode.checked && cell){
-                ctx.fillStyle = ((cell.r*0.299 + cell.g*0.587 + cell.b*0.114)>160)?'#222222':'#ffffff';
-                ctx.font = `${Math.max(7,px*0.42)}px Consolas`;
-                ctx.textAlign='center';
-                ctx.textBaseline='middle';
-                ctx.fillText(cell.code, x*px+px/2, y*px+px/2);
-            }
-            ctx.restore();
         }
-    }
-
-    fitCanvasToViewport();
-
-    //统计清单
-    const countMap = {};
-    for(let y=0;y<h;y++){
-        for(let x=0;x<w;x++){
-            const c = grid[y][x];
-            if(!c) continue;
-            countMap[c.code] = (countMap[c.code]||0)+1;
+        let statText = `图纸尺寸：宽${w} × 高${h}\n\n【色号清单｜数量】\n`;
+        let totalBead =0;
+        for(const code of Object.keys(countMap).sort()){
+            const num = countMap[code];
+            totalBead += num;
+            const info = MARD_COLORS.find(x=>x.code===code);
+            statText += `${code} ${info?.name||''} : ${num}颗\n`;
         }
+        statText +=`\n合计使用拼豆：${totalBead}颗`;
+        statDom.innerText = statText;
+    } finally {
+        setGenerateLoading(false);
     }
-    let statText = `图纸尺寸：宽${w} × 高${h}\n\n【色号清单｜数量】\n`;
-    let totalBead =0;
-    for(const code of Object.keys(countMap).sort()){
-        const num = countMap[code];
-        totalBead += num;
-        const info = MARD_COLORS.find(x=>x.code===code);
-        statText += `${code} ${info?.name||''} : ${num}颗\n`;
-    }
-    statText +=`\n合计使用拼豆：${totalBead}颗`;
-    statDom.innerText = statText;
 }
 
 genBtn.onclick = triggerGenerate;
@@ -1409,8 +1466,9 @@ downloadBtn.onclick = function(){
     expCvs.height = (h*px + legendBlockHeight + 12) * scale;
     const ectx = expCvs.getContext('2d');
     ectx.scale(scale,scale);
-    ectx.imageSmoothingEnabled = true;
-    ectx.imageSmoothingQuality = 'high';
+    ectx.imageSmoothingEnabled = false;
+    ectx.webkitImageSmoothingEnabled = false;
+    ectx.imageSmoothingQuality = 'low';
 
     if (!transparentBg.checked) {
         ectx.fillStyle = '#ffffff';

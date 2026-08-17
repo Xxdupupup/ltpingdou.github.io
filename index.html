@@ -1455,12 +1455,26 @@ downloadBtn.onclick = function(){
         return { code, name: info?.name || '', count: countMap[code] };
     });
 
-    const legendColumns = Math.max(2, Math.min(4, Math.ceil(Math.sqrt(legendLines.length))));
-    const legendGap = 10;
-    const itemWidth = Math.max(92, Math.min(130, (w * px - 36) / legendColumns));
+    const legendGap = 8;
+    const legendPaddingX = 12;
+    const availableContentWidth = Math.max(120, w * px - 24);
+    const minCellWidth = 80;
+    const maxColumns = Math.max(
+        2,
+        Math.min(
+            12,
+            Math.floor((availableContentWidth + legendGap) / (minCellWidth + legendGap))
+        )
+    );
+    const legendColumns = Math.min(
+        Math.max(2, Math.ceil(Math.sqrt(legendLines.length * 1.5))),
+        Math.max(2, maxColumns),
+        Math.max(2, legendLines.length)
+    );
+    const cellWidth = (availableContentWidth - legendPaddingX * 2 - legendGap * (legendColumns - 1)) / legendColumns;
     const legendItemHeight = 20;
     const legendRows = Math.ceil(legendLines.length / legendColumns);
-    const legendBlockHeight = 48 + legendRows * (legendItemHeight + 8) + 12;
+    const legendBlockHeight = 36 + legendRows * (legendItemHeight + 10) + 10;
     const expCvs = document.createElement('canvas');
     expCvs.width = w*px*scale;
     expCvs.height = (h*px + legendBlockHeight + 12) * scale;
@@ -1493,7 +1507,7 @@ downloadBtn.onclick = function(){
             }
             if(showCode.checked && cell){
                 ectx.fillStyle = ((cell.r*0.299 + cell.g*0.587 + cell.b*0.114)>160)?'#222222':'#ffffff';
-                ectx.font = `${Math.max(7,px*0.42)}px Consolas`;
+                ectx.font = `${Math.max(8, Math.min(14, px * 0.55))}px Consolas`;
                 ectx.textAlign='center';
                 ectx.textBaseline='middle';
                 ectx.fillText(cell.code, x*px+px/2, y*px+px/2);
@@ -1504,31 +1518,36 @@ downloadBtn.onclick = function(){
 
     // 图例背景
     const legendTop = h * px + 10;
+    const legendLeft = 8;
+    const legendWidth = Math.max(100, w * px - 16);
     ectx.fillStyle = '#fffdfb';
-    ectx.fillRect(0, legendTop, w * px, legendBlockHeight);
+    ectx.fillRect(legendLeft, legendTop, legendWidth, legendBlockHeight);
     ectx.strokeStyle = '#ead7c8';
     ectx.lineWidth = 1;
-    ectx.strokeRect(0, legendTop, w * px, legendBlockHeight);
+    ectx.strokeRect(legendLeft, legendTop, legendWidth, legendBlockHeight);
 
     ectx.fillStyle = '#5d4a3f';
     ectx.font = 'bold 14px sans-serif';
     ectx.textAlign = 'left';
-    ectx.fillText('颜色图例', 16, legendTop + 20);
+    ectx.fillText('颜色图例', legendLeft + 12, legendTop + 18);
 
-    const startX = 16;
+    const startX = legendLeft + legendPaddingX;
     const legendY = legendTop + 30;
-    let currentX = startX;
-    let currentY = legendY;
 
     legendLines.forEach((item, index) => {
+        const rowIndex = Math.floor(index / legendColumns);
+        const colIndex = index % legendColumns;
+        const itemX = startX + colIndex * (cellWidth + legendGap);
+        const itemY = legendY + rowIndex * (legendItemHeight + 8);
+        const swatchX = itemX + 2;
+        const swatchY = itemY + 2;
+        const swatchW = 16;
+        const swatchH = 16;
         const color = MARD_COLORS.find(x => x.code === item.code) || { r: 255, g: 255, b: 255 };
-        const swatchX = currentX;
-        const swatchY = currentY;
-        const swatchW = 18;
-        const swatchH = 18;
 
         ectx.fillStyle = '#f5efe9';
-        ectx.fillRect(swatchX - 4, swatchY - 4, swatchW + 8, swatchH + 8);
+        ectx.fillRect(itemX, itemY, cellWidth, legendItemHeight);
+
         ectx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
         ectx.fillRect(swatchX, swatchY, swatchW, swatchH);
         ectx.strokeStyle = '#d8c5b7';
@@ -1536,16 +1555,13 @@ downloadBtn.onclick = function(){
 
         ectx.fillStyle = '#334155';
         ectx.font = '11px sans-serif';
-        ectx.fillText(`${item.code}`, swatchX + 24, swatchY + 12);
+        ectx.textAlign = 'left';
+        ectx.fillText(`${item.code}`, swatchX + 22, swatchY + 11);
 
         ectx.fillStyle = '#6b7280';
-        ectx.fillText(`×${item.count}`, swatchX + 58, swatchY + 12);
-
-        currentX += itemWidth;
-        if ((index + 1) % legendColumns === 0) {
-            currentX = startX;
-            currentY += legendItemHeight + 8;
-        }
+        ectx.textAlign = 'right';
+        ectx.fillText(`×${item.count}`, itemX + cellWidth - 6, swatchY + 11);
+        ectx.textAlign = 'left';
     });
 
     const filename = `mard拼豆图纸_${w}x${h}.png`;
